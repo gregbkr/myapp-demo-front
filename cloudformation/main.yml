@@ -1,0 +1,138 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  GithubRepo:
+    Description: Github repository name
+    Type: String
+    Default: "https://github.com/gregbkr/myapp-demo-front"
+  BucketName:
+    Description: Bucket to store our static site
+    Type: String
+    Default: "myapp.cloudlabs.link"
+  ProjectName:
+    Description: Bucket for SAM to store code
+    Type: String
+    Default: "myapp-demo-front" 
+  HostedZoneName:
+    Description: HostedZoneName for the DNS
+    Type: String
+    Default: "cloudlabs.link." 
+    
+
+Resources:
+
+  S3BucketFront:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+    DeletionPolicy: Retain
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3BucketFront
+                - /*
+      Bucket: !Ref S3BucketFront
+                  
+  Project:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref ProjectName
+      Description: CodeBuild created via cloudformation
+      ServiceRole: !Ref 'CodeBuildRole'
+      Artifacts:
+        Type: no_artifacts
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+      Source:
+        Location: !Ref GithubRepo
+        Type: GITHUB
+      TimeoutInMinutes: 10
+      Tags:
+        - Key: Key1
+          Value: Value1
+        - Key: Key2
+          Value: Value2
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/develop$
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/master$
+
+  CodeBuildRole:
+    Description: serverless demo hello role in IAM for AWS CodeBuild
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+      Path: /
+      RoleName: !Ref ProjectName
+    Type: AWS::IAM::Role
+
+  CodeBuildPolicy:
+    Description: Setting IAM policy for service role for CodeBuild
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:*
+          - s3:*
+          - codebuild:*
+          Effect: Allow
+          Resource: '*'
+      PolicyName: !Ref ProjectName
+      Roles:
+      - !Ref 'CodeBuildRole'
+    Type: AWS::IAM::Policy
+
+  myDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Ref HostedZoneName
+      Comment: DNS name for my S3 hosting myapp.
+      Name: !Ref BucketName
+      Type: CNAME
+      TTL: '900'
+      ResourceRecords:
+      - s3-website-eu-west-1.amazonaws.com
+
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt 
+      - S3BucketFront
+      - WebsiteURL
+    Description: URL for website hosted on S3
+  S3BucketSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3BucketFront
+          - DomainName
+    Description: Name of S3 bucket to hold website content
