@@ -2,7 +2,8 @@ version: 0.2
 
 env:
   variables:
-    BUCKET_NAME: "myapp.cloudlabs.link"
+    #BUCKET_NAME: "myapp.cloudlabs.link"
+    BUCKET_NAME: "myapp-demo.cloudlabs.link"
     GATSBY_ENV_VAR: "Value from the buildspec..."
   parameter-store:
     GATSBY_API_URL: "/master/myapp/api_url"
@@ -29,7 +30,7 @@ phases:
       - ./node_modules/.bin/gatsby build --prefix-paths
   post_build:
     commands:
-      - aws s3 cp public s3://${BUCKET_NAME}/$BRANCH --recursive
+      - aws s3 cp public s3://${BUCKET_NAME} --recursive
 
 cache:
   paths:

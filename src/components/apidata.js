@@ -1,47 +1,83 @@
 import React from "react"
-import axios from "axios"
+// axios.get(GATSBY_API_URL, { headers: { 'x-api-key': '3oSJjiDKSu6I6FZslKbhz4UqDTiZ2OJi7L9Tn6NV' } })
 
 class ApiData extends React.Component {
 
   constructor(props) {
     super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSum = this.handleSum.bind(this);
+    this.handleCapital = this.handleCapital.bind(this);
   }
 
   state = {
     error: false,
     helloText: [],
-    additionResult: []
+    sumResult: [],
+    capitalResult: []
   }
+  
   componentDidMount() {
-    const GATSBY_API_URL = "https://s1xkj1atd2.execute-api.eu-west-1.amazonaws.com/Prod/hello"
-    //const GATSBY_API_KEY = "3oSJjiDKSu6I6FZslKbhz4UqDTiZ2OJi7L9Tn6NV"
-    const GATSBY_API_KEY = "ikZ21B40WU9ssS7YVrgDw1bzVUPeMun53jYE2DVP"
-
-    // axios.get(GATSBY_API_URL, { headers: { 'x-api-key': '3oSJjiDKSu6I6FZslKbhz4UqDTiZ2OJi7L9Tn6NV' } })
-    fetch(GATSBY_API_URL, {
+    var url = "https://" + process.env.GATSBY_API_URL + "hello"
+    const requestOptions = {
       method: 'GET',
-      headers: {
-        'x-api-key': GATSBY_API_KEY
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.GATSBY_API_KEY   
       }
-    })
+    };
+
+    fetch(url, requestOptions)
       .then(response => response.json())
       .then(data => {
-        console.log(data.message)
+        // console.log(data.message)
         this.setState({ helloText: data.message })
       })
   }
 
-  handleSubmit(event) {
+  // curl -X POST -d '{"key1":2,"key2":3}' -H "content-type: application/json" https://41yz6noqw3.execute-api.eu-west-1.amazonaws.com/Prod/sum
+  handleSum(event) {
     event.preventDefault()
+    console.log(this.n1.value)
+
+    var url = "https://" + process.env.GATSBY_API_URL + "sum"
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ n1: this.n1.value, n2: this.n2.value })
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.GATSBY_API_KEY 
+      },      
+      body: JSON.stringify({ key1: this.n1.value, key2: this.n2.value })
     };
-    fetch('https://fuagh3hifi.execute-api.eu-west-1.amazonaws.com/dev/addition', requestOptions)
+    
+    fetch(url, requestOptions)
       .then(response => response.json())
-      .then(data => this.setState({ additionResult: "Result is: " + data }))
+      .then(data => {
+        console.log(data.result)
+        this.setState({ sumResult: data.result})
+      })
+  }
+
+  handleCapital(event) {
+    event.preventDefault()
+    console.log(this.country.value)
+    var url = "https://" + process.env.GATSBY_API_URL + "capital?country=" + this.country.value
+    console.log(url)
+    // const GATSBY_API_URL = "https://41yz6noqw3.execute-api.eu-west-1.amazonaws.com/Prod/capital"
+    
+    const requestOptions = {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.GATSBY_API_KEY
+      },
+    };
+    
+    fetch(url, requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.capital)
+        this.setState({ capitalResult: data.capital})
+      })
   }
 
   render() {
@@ -51,17 +87,24 @@ class ApiData extends React.Component {
         <br></br>
         <h3>Lamdba via openAPI</h3>
         <ul>
-          <li>Simple GET to /hello when page loads - Result: <b>{this.state.helloText}</b></li>
-          <li>Returned data from button click:
-            <form onSubmit={this.handleSubmit}>
-              <input ref={(ref) => { this.n1 = ref }} placeholder="Number 1" type="text" name="n1" style={{ width: "60px" }} />
+          <li>Simple GET to /hello when page loads : <b>{this.state.helloText}</b></li>
+          <li>Sum of two numbers:
+            <form onSubmit={this.handleSum}>
+              <input ref={(ref) => { this.n1 = ref }} placeholder="Num 1" type="number" name="n1" style={{ width: "60px" }} />
               &nbsp;+&nbsp;
-              <input ref={(ref) => { this.n2 = ref }} placeholder="Number 2" type="text" name="n2" style={{ width: "60px" }} />&nbsp;
-              <button type="Submit">Calculate sum</button>&nbsp;
-              <b>{this.state.additionResult}</b>
+              <input ref={(ref) => { this.n2 = ref }} placeholder="Num 2" type="number" name="n2" style={{ width: "60px" }} />&nbsp;
+              <button type="Submit">Calculate</button>&nbsp;&nbsp;&nbsp;
+              <b>{this.state.sumResult}</b>
             </form>
           </li>
-          <li>Other?</li>
+          <li>Find the capital of france, england or spain:
+            <form onSubmit={this.handleCapital}>
+              <input ref={(ref) => { this.country = ref }} placeholder="france" type="text" name="country" style={{ width: "100px" }} />
+              &nbsp;&nbsp;
+              <button type="Submit">Find the capital</button>&nbsp;&nbsp;&nbsp;
+              <b>{this.state.capitalResult}</b>
+            </form>
+          </li>
         </ul>
       </div>
     )

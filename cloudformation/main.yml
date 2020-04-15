@@ -9,7 +9,8 @@ Parameters:
   BucketName:
     Description: Bucket to store our static site
     Type: String
-    Default: "myapp.cloudlabs.link"
+    #Default: "myapp.cloudlabs.link"
+    Default: "myapp-demo.cloudlabs.link"
   ProjectName:
     Description: Bucket for SAM to store code
     Type: String
@@ -111,16 +112,16 @@ Resources:
       - !Ref 'CodeBuildRole'
     Type: AWS::IAM::Policy
 
-  myDNSRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneName: !Ref HostedZoneName
-      Comment: DNS name for my S3 hosting myapp.
-      Name: !Ref BucketName
-      Type: CNAME
-      TTL: '900'
-      ResourceRecords:
-      - s3-website-eu-west-1.amazonaws.com
+  # myDNSRecord:
+  #   Type: AWS::Route53::RecordSet
+  #   Properties:
+  #     HostedZoneName: !Ref HostedZoneName
+  #     Comment: DNS name for my S3 hosting myapp.
+  #     Name: !Ref BucketName
+  #     Type: CNAME
+  #     TTL: '900'
+  #     ResourceRecords:
+  #     - s3-website-eu-west-1.amazonaws.com
 
 Outputs:
   WebsiteURL:
