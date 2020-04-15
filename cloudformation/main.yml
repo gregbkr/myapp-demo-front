@@ -105,6 +105,7 @@ Resources:
           - logs:*
           - s3:*
           - codebuild:*
+          - ssm:GetParameters
           Effect: Allow
           Resource: '*'
       PolicyName: !Ref ProjectName
