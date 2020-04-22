@@ -52,11 +52,16 @@ aws ssm put-parameter --name "/master/myapp/api_url" --value "hxaxon4jz9.execute
 cd cloudformation
 export CF_DEMO_ENVIRONMENT=greg-gg
 
-./deploy.sh ${CF_DEMO_ENVIRONMENT} https://github.com/gregbkr/myapp-front-api front.cloudlabs.link ieddcaot8i.execute-api.eu-west-1.amazonaws.com/Prod/ YetSxaQMZj7A4wLmV5Fd3aVQ3oXfilyL7dpV6k2m
+./deploy.sh \
+    ${CF_DEMO_ENVIRONMENT} \
+    https://github.com/gregbkr/myapp-front-api \
+    21414af27e9f3f2eccaf68554459b5a8e1d17c5b \
+    front.cloudlabs.link \
+    ieddcaot8i.execute-api.eu-west-1.amazonaws.com/Prod/ \
+    YetSxaQMZj7A4wLmV5Fd3aVQ3oXfilyL7dpV6k2m
 ```
 
-
-- Browser the front url:
+- Browse the front url:
 ```
 aws cloudformation \
    describe-stacks \
@@ -69,7 +74,7 @@ aws cloudformation \
 nano main.yml <-- edit with your needs
 aws cloudformation create-stack --stack-name myapp-demo-front-infra-init --template-body file://main.yml --capabilities CAPABILITY_NAMED_IAM
 ... update-stack ... <-- if already created
-```
+
 
 ## Deploy FRONT
 
