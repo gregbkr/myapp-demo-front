@@ -2,36 +2,31 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
-  GithubRepo:
+  GitHubRepo:
     Description: Github repository name
     Type: String
-    Default: "https://github.com/gregbkr/myapp-demo-front"
-  BucketName:
-    Description: Bucket to store our static site
+    Default: "https://github.com/gregbkr/myapp-gatsby-front"
+  Dns:
+    Description: Dns name for the front, and bucket name
     Type: String
-    #Default: "myapp.cloudlabs.link"
     Default: "myapp-demo.cloudlabs.link"
-  ProjectName:
-    Description: Bucket for SAM to store code
-    Type: String
-    Default: "myapp-demo-front" 
   HostedZoneName:
     Description: HostedZoneName for the DNS
     Type: String
     Default: "cloudlabs.link." 
-    
 
 Resources:
 
   S3BucketFront:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref BucketName
+      BucketName: !Ref Dns
       AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
     DeletionPolicy: Retain
+
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -53,7 +48,7 @@ Resources:
   Project:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Ref ProjectName
+      Name: !Ref AWS::StackName
       Description: CodeBuild created via cloudformation
       ServiceRole: !Ref 'CodeBuildRole'
       Artifacts:
@@ -63,7 +58,7 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
       Source:
-        Location: !Ref GithubRepo
+        Location: !Ref GitHubRepo
         Type: GITHUB
       TimeoutInMinutes: 10
       Tags:
@@ -93,7 +88,7 @@ Resources:
           Principal:
             Service: codebuild.amazonaws.com
       Path: /
-      RoleName: !Ref ProjectName
+      RoleName: !Ref AWS::StackName
     Type: AWS::IAM::Role
 
   CodeBuildPolicy:
@@ -108,7 +103,7 @@ Resources:
           - ssm:GetParameters
           Effect: Allow
           Resource: '*'
-      PolicyName: !Ref ProjectName
+      PolicyName: !Ref AWS::StackName
       Roles:
       - !Ref 'CodeBuildRole'
     Type: AWS::IAM::Policy

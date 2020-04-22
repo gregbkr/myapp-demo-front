@@ -2,8 +2,7 @@ version: 0.2
 
 env:
   variables:
-    #BUCKET_NAME: "myapp.cloudlabs.link"
-    BUCKET_NAME: "myapp-demo.cloudlabs.link"
+    BUCKET_NAME: "front.cloudlabs.link"
     GATSBY_ENV_VAR: "Value from the buildspec..."
   parameter-store:
     GATSBY_API_URL: "/master/myapp/api_url"
@@ -15,12 +14,10 @@ phases:
       python: 3.8
       nodejs: 12
     commands:
-      - echo "$CODEBUILD_WEBHOOK_BASE_REF | $CODEBUILD_WEBHOOK_HEAD_REF | $CODEBUILD_WEBHOOK_TRIGGER | $CODEBUILD_SOURCE_VERSION"
       # Only $CODEBUILD_WEBHOOK_TRIGGER return an ugly "branch/develop" when codebuild see new push. For manual and local build, the var is sadly empty.
       - BRANCH=$(echo "$CODEBUILD_WEBHOOK_TRIGGER" | sed 's/branch\///g')
       - if  [ -z "$BRANCH" ]; then BRANCH=$ENV; fi  
-      # ^^ Please set $ENV var for local or manual build as I can not retreive $BRANCH var.
-      - echo $BRANCH
+      # ^^ Please set $ENV var for local or manual build as I can not retrieve $BRANCH var.
       - env
       - npm --version
       - pip3 install awscli --upgrade

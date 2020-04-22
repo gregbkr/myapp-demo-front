@@ -11,7 +11,7 @@ const IndexPage = () => (
   <Layout>
     <SEO title="Home" />
     <h1>Some AWS Devops functions</h1>
-    <p>This page is using aws infrastructure to demo popular services.</p>
+    <p>This page is using aws infrastructure to demo popular services (v0.1)</p>
     {/* <p>Now go build something great.</p> */}
     <ApiData/>
     <Vars/>
