@@ -18,6 +18,10 @@ Parameters:
     Description: HostedZoneName for the DNS
     Type: String
     Default: "cloudlabs.link." 
+  CertArn:
+    Description: Arn of the certificate serving the DNS
+    Type: String
+    Default: "arn:aws:acm:us-east-1:282835178041:certificate/9145b208-9608-4d34-be52-2e5f0061a123" 
 
 Resources:
 
@@ -74,7 +78,7 @@ Resources:
           version: 0.2
           env:
             variables:
-              BUCKET_NAME: !Ref Dns
+              BUCKET_NAME: ${Dns}
               GATSBY_ENV_VAR: "Value from the buildspec..."
             parameter-store:
               GATSBY_API_URL: "/master/myapp/api_url"
@@ -85,10 +89,7 @@ Resources:
                 python: 3.8
                 nodejs: 12
               commands:
-                # Only $CODEBUILD_WEBHOOK_TRIGGER return an ugly "branch/develop" when codebuild see new push. For manual and local build, the var is sadly empty.
                 - BRANCH=$(echo "$CODEBUILD_WEBHOOK_TRIGGER" | sed 's/branch\///g')
-                - if  [ -z "$BRANCH" ]; then BRANCH=$ENV; fi  
-                # ^^ Please set $ENV var for local or manual build as I can not retrieve $BRANCH var.
                 - env
                 - npm --version
                 - pip3 install awscli --upgrade
@@ -157,16 +158,61 @@ Resources:
       - !Ref 'CodeBuildRole'
     Type: AWS::IAM::Policy
 
+  #Cloudfront
+  myDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        HttpVersion: http2
+        Origins:
+        - DomainName: !Sub "${Dns}.s3-website-eu-west-1.amazonaws.com"
+          Id: !Sub "S3-Website-${Dns}.s3-website-eu-west-1.amazonaws.com"
+          CustomOriginConfig:
+            OriginProtocolPolicy: https-only
+        Enabled: 'true'
+        Comment: My app demo
+        DefaultRootObject: index.html
+        # Logging:
+        #   IncludeCookies: 'false'
+        #   Bucket: mylogs.s3.amazonaws.com
+        #   Prefix: myprefix
+        Aliases:
+        - !Ref Dns
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - DELETE
+          - GET
+          - HEAD
+          - OPTIONS
+          - PATCH
+          - POST
+          - PUT
+          TargetOriginId: !Sub "S3-Website-${Dns}.s3-website-eu-west-1.amazonaws.com"
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        PriceClass: PriceClass_200
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.1_2016
+
+  # DNS
   # myDNSRecord:
   #   Type: AWS::Route53::RecordSet
   #   Properties:
   #     HostedZoneName: !Ref HostedZoneName
-  #     Comment: DNS name for my S3 hosting myapp.
-  #     Name: !Ref BucketName
-  #     Type: CNAME
-  #     TTL: '900'
-  #     ResourceRecords:
-  #     - s3-website-eu-west-1.amazonaws.com
+  #     Comment: DNS name pointing to Cloudfront
+  #     Name: !Ref Dns
+  #     Type: A
+  #     AliasTarget: 
+  #       DNSName: !GetAtt myDistribution.DomainName
+  #       HostedZoneId: ZD9UKZR81RFQW
+      # TTL: '900'
+      # ResourceRecords:
+      # - s3-website-eu-west-1.amazonaws.com
 
 Outputs:
   WebsiteURL:
@@ -182,3 +228,7 @@ Outputs:
           - S3BucketFront
           - DomainName
     Description: Name of S3 bucket to hold website content
+  CloudFrontDomain:
+    Value: !GetAtt
+      - myDistribution
+      - DomainName

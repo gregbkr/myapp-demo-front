@@ -2,10 +2,9 @@
 set -ex
 
 ENV_NAME_ARG=$1
-BRANCH=$2
 
 INFRA_STACK=${ENV_NAME_ARG}-front-infra
-
+DNS=$2
 
 ###############################################################################
 # Delete the S3 bucket used to store SAM Cloud Formation templates. Cloud Formation
@@ -13,8 +12,8 @@ INFRA_STACK=${ENV_NAME_ARG}-front-infra
 # this must happen first.
 #
 
-if aws s3 ls s3://${INFRA_STACK}; then
-    aws s3 rb s3://${INFRA_STACK} --force || true
+if aws s3 ls s3://${DNS}; then
+    aws s3 rb s3://${DNS} --force || true
 fi
 
 
