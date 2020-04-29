@@ -22,21 +22,21 @@ INFRA_STACK=${ENV_NAME_ARG}-front-infra
             GitHubRepo=${GITHUB_REPO} \
             GitHubToken=${GITHUB_TOKEN} \
             Dns=${DNS} \
-            HostedZone=${HOSTED_ZONE} \
+            HostedZoneName=${HOSTED_ZONE} \
             CertArn=${CERT_ARN}
 # fi
 
 # Load api variable to SSM, for codebuild to use later
-aws ssm put-parameter --name "/master/myapp/api_url" --value ${GATSBY_API_URL} --type String --overwrite
-aws ssm put-parameter --name "/master/myapp/api_key" --value ${GATSBY_API_KEY} --type SecureString --overwrite
+# aws ssm put-parameter --name "/master/myapp/api_url" --value ${GATSBY_API_URL} --type String --overwrite
+# aws ssm put-parameter --name "/master/myapp/api_key" --value ${GATSBY_API_KEY} --type SecureString --overwrite
 
-# Gatsby Build
-cd ..
-npm install
-./node_modules/.bin/gatsby build --prefix-paths
+# # Gatsby Build
+# cd ..
+# npm install
+# ./node_modules/.bin/gatsby build --prefix-paths
 
-# Copy site to S3
-#aws s3 cp public s3://${DNS} --recursive
-aws s3 sync --delete public s3://${DNS}
+# # Copy site to S3
+# #aws s3 cp public s3://${DNS} --recursive
+# aws s3 sync --delete public s3://${DNS}
 
-echo "$(date):create:${INFRA_STACK}:success"
+# echo "$(date):create:${INFRA_STACK}:success"

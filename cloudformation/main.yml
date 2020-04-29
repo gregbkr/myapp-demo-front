@@ -165,10 +165,10 @@ Resources:
       DistributionConfig:
         HttpVersion: http2
         Origins:
-        - DomainName: !Sub "${Dns}.s3-website-eu-west-1.amazonaws.com"
-          Id: !Sub "S3-Website-${Dns}.s3-website-eu-west-1.amazonaws.com"
+        - DomainName: !Sub "${Dns}.s3-website-eu-west-1.amazonaws.com"  
+          Id: s3-website
           CustomOriginConfig:
-            OriginProtocolPolicy: https-only
+            OriginProtocolPolicy: http-only
         Enabled: 'true'
         Comment: My app demo
         DefaultRootObject: index.html
@@ -187,7 +187,7 @@ Resources:
           - PATCH
           - POST
           - PUT
-          TargetOriginId: !Sub "S3-Website-${Dns}.s3-website-eu-west-1.amazonaws.com"
+          TargetOriginId: s3-website
           ForwardedValues:
             QueryString: 'false'
             Cookies:
@@ -200,19 +200,16 @@ Resources:
           MinimumProtocolVersion: TLSv1.1_2016
 
   # DNS
-  # myDNSRecord:
-  #   Type: AWS::Route53::RecordSet
-  #   Properties:
-  #     HostedZoneName: !Ref HostedZoneName
-  #     Comment: DNS name pointing to Cloudfront
-  #     Name: !Ref Dns
-  #     Type: A
-  #     AliasTarget: 
-  #       DNSName: !GetAtt myDistribution.DomainName
-  #       HostedZoneId: ZD9UKZR81RFQW
-      # TTL: '900'
-      # ResourceRecords:
-      # - s3-website-eu-west-1.amazonaws.com
+  myDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Ref HostedZoneName
+      Comment: DNS name pointing to Cloudfront
+      Name: !Ref Dns
+      Type: A
+      AliasTarget: 
+        DNSName: !GetAtt myDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
 
 Outputs:
   WebsiteURL:
@@ -223,7 +220,7 @@ Outputs:
   S3BucketSecureURL:
     Value: !Join 
       - ''
-      - - 'https://'
+      - - 'http://'
         - !GetAtt 
           - S3BucketFront
           - DomainName
