@@ -1,6 +1,11 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
 
+Description: >
+  This demo deploys an an S3 with hosting capabilities. 
+  It is connected to a CloudFront + cert.
+  CI/CD enabled via CodeBuild.
+
 Parameters:
   GitHubRepo:
     Description: Github repository name
@@ -71,9 +76,6 @@ Resources:
         Auth:
           Resource: !Ref CodeBuildSourceCredential
           Type: OAUTH
-        Auth: 
-          Type: OAUTH
-          Resource: !Ref CodeBuildSourceCredential
         BuildSpec: !Sub |
           version: 0.2
           env:

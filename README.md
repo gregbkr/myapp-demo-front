@@ -13,7 +13,7 @@ More info: you can find an overview of that setup on my [blog](https://greg.sato
 - Front: Reactjs [Gatsby](https://www.gatsbyjs.org) with [Gatsby starter template](https://www.gatsbyjs.org/starters/gatsbyjs/gatsby-starter-default/)
 - Hosting: [S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/Welcome.html): to store your static files
 - CDN: [cloudfront](https://aws.amazon.com/cloudfront)
-- CI: Codebuild
+- CI/CD: CodeBuild
 - Deployment: [CloudFormation](https://aws.amazon.com/cloudformation) templates
 
 ### CI/CD flow diagram
@@ -98,7 +98,7 @@ Ex:
 
 ## To do
 - [x] Destroy stack
-- [ ] Cert + DNS
+- [x] Cert + DNS
 - [x] Fix build
 
 ## Annexes
